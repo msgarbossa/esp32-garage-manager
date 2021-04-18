@@ -1,0 +1,417 @@
+[
+    {
+        "id": "f860dfb9.865378",
+        "type": "mqtt in",
+        "z": "c7d62f.4b9c41d",
+        "name": "mqtt-garage",
+        "topic": "home/garage/metrics",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "ee701ac3.03ed3",
+        "x": 110,
+        "y": 660,
+        "wires": [
+            [
+                "ed5e331f.3cf488"
+            ]
+        ]
+    },
+    {
+        "id": "ed5e331f.3cf488",
+        "type": "json",
+        "z": "c7d62f.4b9c41d",
+        "name": "json-garage",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 310,
+        "y": 660,
+        "wires": [
+            [
+                "19921d4e.aeb15b"
+            ]
+        ]
+    },
+    {
+        "id": "15932bb1.63be34",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "func-garage-temp",
+        "func": "var metric = {\n    \"op\": \"set\",\n    \"val\": msg.payload.t\n}\nvar newMsg = { payload: metric };\nreturn newMsg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 790,
+        "y": 680,
+        "wires": [
+            [
+                "3a12395a.1ca056"
+            ]
+        ]
+    },
+    {
+        "id": "3a12395a.1ca056",
+        "type": "prometheus-exporter",
+        "z": "c7d62f.4b9c41d",
+        "name": "",
+        "metric": "61a258d6.4a97a8",
+        "x": 1080,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "3da7fbb0.098bf4",
+        "type": "debug",
+        "z": "c7d62f.4b9c41d",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "b18ce51f.28c82",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "func-garage-humidity",
+        "func": "var metric = {\n    \"op\": \"set\",\n    \"val\": msg.payload.h\n}\nvar newMsg = { payload: metric };\nreturn newMsg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 800,
+        "y": 740,
+        "wires": [
+            [
+                "1fbf324a.1f3cce"
+            ]
+        ]
+    },
+    {
+        "id": "1fbf324a.1f3cce",
+        "type": "prometheus-exporter",
+        "z": "c7d62f.4b9c41d",
+        "name": "",
+        "metric": "13245f9a.917f1",
+        "x": 1090,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "e2af181d.81f6f8",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "func-garage-health",
+        "func": "d = new Date();\ncurrentMilli = d.getTime();\nif (msg.payload == \"healthcheck\") {\n    lastMilli = context.get(\"lastUpdate\");\n    if ((currentMilli - lastMilli) > 600000) {\n        if (context.get(\"status\") == \"offline\") {\n            return null;\n        } else {\n            context.set(\"status\", \"offline\");\n            node.status({fill:\"red\",shape:\"ring\",text:\"disconnected\"});\n            var newPayload = {};\n            for (var key in context.get(\"lastPayload\")) {\n                newPayload[key] = 0;\n            }\n            var newMsg = { payload: newPayload };\n            return newMsg;\n        }\n    } else {\n        context.set(\"status\", \"online\");\n    }\n} else {\n    context.set(\"key_cache\", Object.keys(msg.payload));\n    context.set(\"lastPayload\", msg.payload);\n    context.set(\"lastUpdate\", currentMilli);\n    node.status({fill:\"green\",shape:\"dot\",text:\"connected\"});\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is deployed.\nd = new Date();\nif (context.get(\"lastUpdate\") == undefined) {\n    context.set(\"lastUpdate\", d.getTime())\n}\ncontext.set(\"key_cache\", []);\n// node.status({});   // clear the status",
+        "finalize": "",
+        "x": 550,
+        "y": 660,
+        "wires": [
+            [
+                "3da7fbb0.098bf4",
+                "15932bb1.63be34",
+                "b18ce51f.28c82",
+                "23b5e413.3599d4",
+                "b2fc9322.211068",
+                "89a1e82c.ad6dc"
+            ]
+        ]
+    },
+    {
+        "id": "5631d095.a11458",
+        "type": "inject",
+        "z": "c7d62f.4b9c41d",
+        "name": "inject-reaper",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1200",
+        "topic": "",
+        "payload": "healthcheck",
+        "payloadType": "str",
+        "x": 300,
+        "y": 760,
+        "wires": [
+            [
+                "e2af181d.81f6f8"
+            ]
+        ]
+    },
+    {
+        "id": "23b5e413.3599d4",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "func-garage-signal",
+        "func": "var metric = {\n    \"op\": \"set\",\n    \"val\": msg.payload.s\n}\nvar newMsg = { payload: metric };\nreturn newMsg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 790,
+        "y": 800,
+        "wires": [
+            [
+                "1a27901f.ef5238"
+            ]
+        ]
+    },
+    {
+        "id": "1a27901f.ef5238",
+        "type": "prometheus-exporter",
+        "z": "c7d62f.4b9c41d",
+        "name": "",
+        "metric": "6a60b619.93a038",
+        "x": 1080,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "19921d4e.aeb15b",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "func-garage-filter",
+        "func": "if (\"t\" in msg.payload) {\n    return msg;\n} else {\n    return;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 470,
+        "y": 600,
+        "wires": [
+            [
+                "e2af181d.81f6f8"
+            ]
+        ]
+    },
+    {
+        "id": "b2fc9322.211068",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "func-garage-door",
+        "func": "var metric = {\n    \"op\": \"set\",\n    \"val\": msg.payload.d\n}\nflow.set(\"garage_door_status\", msg.payload.d);\nvar newMsg = { payload: metric };\nreturn newMsg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 790,
+        "y": 860,
+        "wires": [
+            [
+                "fa5af15d.cc6c88"
+            ]
+        ]
+    },
+    {
+        "id": "fa5af15d.cc6c88",
+        "type": "prometheus-exporter",
+        "z": "c7d62f.4b9c41d",
+        "name": "",
+        "metric": "5b111ac6.a5df8c",
+        "x": 1080,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "b69ea396.18d84",
+        "type": "slack-web-out",
+        "z": "c7d62f.4b9c41d",
+        "client": "b06cff83.04ca9",
+        "name": "slack",
+        "x": 1250,
+        "y": 980,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "89a1e82c.ad6dc",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "func-garage-leak",
+        "func": "var metric = {\n    \"op\": \"set\",\n    \"val\": msg.payload.w\n}\nvar newMsg = { payload: metric };\nreturn newMsg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 790,
+        "y": 920,
+        "wires": [
+            [
+                "dba21138.766d9",
+                "6756e36a.9b9c7c"
+            ]
+        ]
+    },
+    {
+        "id": "dba21138.766d9",
+        "type": "prometheus-exporter",
+        "z": "c7d62f.4b9c41d",
+        "name": "",
+        "metric": "9991a518.c195e8",
+        "x": 1080,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "6756e36a.9b9c7c",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "garage-leak-alert",
+        "func": "currentStatus = msg.payload.val;\n\nif (context.get(\"lastStatus\") == undefined) {\n    context.set(\"lastStatus\", currentStatus)\n    return null;\n}\n\nif (currentStatus != context.get(\"lastStatus\")) {\n    context.set(\"lastStatus\", currentStatus)\n    var sensor=msg.topic;\n    if (currentStatus == 1) {\n        state = sensor + \" WET\";\n    } else {\n        state = sensor + \"DRY\";\n    }\n    var newMsg = {\n        payload: state,\n        topic: \"#home\"\n    }\n    return newMsg;\n} else {\n    return null;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "context.set(\"lastStatus\", undefined);",
+        "finalize": "",
+        "x": 1070,
+        "y": 980,
+        "wires": [
+            [
+                "b69ea396.18d84",
+                "e2c29d2c.c3f408"
+            ]
+        ]
+    },
+    {
+        "id": "f1fe60c6.ddc25",
+        "type": "inject",
+        "z": "c7d62f.4b9c41d",
+        "name": "Check if open",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "30 20 * * *",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "test",
+        "payloadType": "str",
+        "x": 780,
+        "y": 1040,
+        "wires": [
+            [
+                "b38f3ec5.80cc1"
+            ]
+        ]
+    },
+    {
+        "id": "b38f3ec5.80cc1",
+        "type": "function",
+        "z": "c7d62f.4b9c41d",
+        "name": "garage-check-closed-at-night",
+        "func": "var state = flow.get(\"garage_door_status\");\nif (state == 1) {\n    var newMsg = {\n        payload: \"garage open\",\n        topic: \"#home\"\n    }\n    return newMsg;\n} else {\n    return;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1020,
+        "y": 1040,
+        "wires": [
+            [
+                "b69ea396.18d84",
+                "e2c29d2c.c3f408"
+            ]
+        ]
+    },
+    {
+        "id": "e2c29d2c.c3f408",
+        "type": "debug",
+        "z": "c7d62f.4b9c41d",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1270,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "ee701ac3.03ed3",
+        "type": "mqtt-broker",
+        "name": "mqtt-broker",
+        "broker": "10.10.1.100",
+        "port": "1883",
+        "clientid": "nodered",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "30",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "61a258d6.4a97a8",
+        "type": "prometheus-metric-config",
+        "name": "garage_temp",
+        "help": "garage temp",
+        "labels": "",
+        "mtype": "gauge"
+    },
+    {
+        "id": "13245f9a.917f1",
+        "type": "prometheus-metric-config",
+        "name": "garage_humidity",
+        "help": "garage humidity",
+        "labels": "",
+        "mtype": "gauge"
+    },
+    {
+        "id": "6a60b619.93a038",
+        "type": "prometheus-metric-config",
+        "name": "garage_signal",
+        "help": "garage signal",
+        "labels": "",
+        "mtype": "gauge"
+    },
+    {
+        "id": "5b111ac6.a5df8c",
+        "type": "prometheus-metric-config",
+        "name": "garage_door",
+        "help": "garage door",
+        "labels": "",
+        "mtype": "gauge"
+    },
+    {
+        "id": "b06cff83.04ca9",
+        "type": "slack-config",
+        "name": "slack-home-api"
+    },
+    {
+        "id": "9991a518.c195e8",
+        "type": "prometheus-metric-config",
+        "name": "garage_leak",
+        "help": "garage leak",
+        "labels": "",
+        "mtype": "gauge"
+    }
+]
