@@ -35,11 +35,9 @@ I use these [inexepensive cases (10-pack)](https://www.amazon.com/gp/product/B07
 
 ![back](/img/ESP32-garage-back.jpg)
 
-The alarm wire can be used to run longer connections to the magnetic door sensor switch and the contacts for triggering the garage door.  If using the leak sensor, the ESP32 will need to be located near the leak sensor (\< 1 meter).  Dental-floss cases seemed ideal due to the clamshell design and soft plastic.
+The alarm wire can be used to run longer connections to the magnetic door sensor switch and the contacts for triggering the garage door.  If using the leak sensor, the ESP32 will need to be located near the leak sensor (\< 1 meter).  Dental-floss cases worked well due to the clamshell design and soft plastic.
 
-![leak-sensor-bottom](/img/leak-sensor-bottom.jpg)
-
-![leak-sensor-inside](/img/leak-sensor-inside.jpg)
+![leak-sensor-bottom](/img/leak-sensor-bottom.jpg)  ![leak-sensor-inside](/img/leak-sensor-inside.jpg)
 
 ## Node-RED
 
