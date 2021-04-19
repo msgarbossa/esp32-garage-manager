@@ -1,13 +1,5 @@
 # ESP32 Garage Manager
 
-## Overview
-
-![front1](/img/ESP32-garage-front1.jpg)
-
-![front2](/img/ESP32-garage-front2.jpg)
-
-![back](/img/ESP32-garage-back.jpg)
-
 ## Basic features
 
 - Remotely trigger a relay to open the garage door
@@ -18,7 +10,6 @@
 - MQTT is used to publish and subscribe messages
 - Node-RED interface to MQTT to process data, export Prometheus metrics, and send alerts for leaks or door left open at night
 - Home Assistant and phone app is used for dashboard button to trigger door
-
 
 ## Parts
 
@@ -33,6 +24,22 @@
 ## Diagram
 
 ![diagram](/img/diagram.png)
+
+## Assembly
+
+I use these [inexepensive cases (10-pack)](https://www.amazon.com/gp/product/B07HKWNB93/), which are pretty easy for prototyping.  They can be cut with an X-acto knife and the X-acto knife can also "drill" holes with the tip. 
+
+![front1](/img/ESP32-garage-front1.jpg)
+
+![front2](/img/ESP32-garage-front2.jpg)
+
+![back](/img/ESP32-garage-back.jpg)
+
+The alarm wire can be used to run longer connections to the magnetic door sensor switch and the contacts for triggering the garage door.  If using the leak sensor, the ESP32 will need to be located near the leak sensor (\< 1 meter).  Dental-floss cases seemed ideal due to the clamshell design and soft plastic.
+
+![leak-sensor-bottom](/img/leak-sensor-bottom.jpg)
+
+![leak-sensor-inside](/img/leak-sensor-inside.jpg)
 
 ## Node-RED
 
